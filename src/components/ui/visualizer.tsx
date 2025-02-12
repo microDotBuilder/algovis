@@ -57,7 +57,7 @@ const Visualizer: React.FC = () => {
     const end = grid[endNode.row][endNode.col];
 
     // Run BFS algorithm
-    const result = bfs(grid, start, end);
+    const result = bfs(start, end);
 
     // Animate the visited nodes
     for (let i = 0; i < result.visitedNodesInOrder.length; i++) {

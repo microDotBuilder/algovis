@@ -5,11 +5,7 @@ export interface BFSResult {
   shortestPath: Node[];
 }
 
-export const bfs = (
-  grid: Node[][],
-  startNode: Node,
-  endNode: Node
-): BFSResult => {
+export const bfs = (startNode: Node, endNode: Node): BFSResult => {
   const queue: Node[] = [];
   const visited: Set<Node> = new Set();
   const visitedNodesInOrder: Node[] = [];
