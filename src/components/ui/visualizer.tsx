@@ -22,6 +22,7 @@ const Visualizer: React.FC = () => {
     useAlgorithm();
   const isRunning = useRef(false);
   const pauseRef = useRef(false);
+  const drawMode = useRef<boolean | null>(null);
   const animationState = useRef<{
     visitedIndex: number;
     pathIndex: number;
@@ -166,6 +167,10 @@ const Visualizer: React.FC = () => {
   };
 
   const handleNodeSelection = (row: number, col: number) => {
+    if (state.grid[row][col].getIsStart() || state.grid[row][col].getIsEnd()) {
+      return;
+    }
+
     if (state.selectionMode === "START" && state.startNode) {
       updateNode(state.startNode.row, state.startNode.col, { isStart: false });
     } else if (state.selectionMode === "END" && state.endNode) {
@@ -195,11 +200,45 @@ const Visualizer: React.FC = () => {
           autoClose: 3000,
         }
       );
+    } else if (state.selectionMode === "WALL") {
+      drawMode.current = !state.grid[row][col].getIsWall();
+      updateNode(row, col, { isWall: drawMode.current });
     }
   };
 
+  const handleMouseDown = (row: number, col: number) => {
+    setMousePressed(true);
+    handleNodeSelection(row, col);
+  };
+
+  const handleMouseEnter = (row: number, col: number) => {
+    if (
+      state.isMousePressed &&
+      state.selectionMode === "WALL" &&
+      drawMode.current !== null
+    ) {
+      if (
+        !state.grid[row][col].getIsStart() &&
+        !state.grid[row][col].getIsEnd()
+      ) {
+        updateNode(row, col, { isWall: drawMode.current });
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    setMousePressed(false);
+    drawMode.current = null;
+  };
+
   return (
-    <div className="grid grid-cols-[repeat(50,1fr)] gap-0 p-4 bg-white rounded-lg shadow-lg">
+    <div
+      className="grid grid-cols-[repeat(50,1fr)] gap-0 p-4 bg-white rounded-lg shadow-lg"
+      onMouseLeave={() => {
+        setMousePressed(false);
+        drawMode.current = null;
+      }}
+    >
       {state.grid.map((row, rowIdx) =>
         row.map((node, colIdx) => (
           <div
@@ -222,18 +261,12 @@ const Visualizer: React.FC = () => {
                   : ""
               }
               transition-colors duration-300
+              cursor-pointer
+              select-none
             `}
-            onMouseDown={() => {
-              setMousePressed(true);
-              handleNodeSelection(rowIdx, colIdx);
-            }}
-            onMouseEnter={() => {
-              if (state.isMousePressed && state.selectionMode === "WALL") {
-                updateNode(rowIdx, colIdx, { isWall: !node.getIsWall() });
-              }
-            }}
-            onMouseUp={() => setMousePressed(false)}
-            onMouseLeave={() => setMousePressed(false)}
+            onMouseDown={() => handleMouseDown(rowIdx, colIdx)}
+            onMouseEnter={() => handleMouseEnter(rowIdx, colIdx)}
+            onMouseUp={handleMouseUp}
           />
         ))
       )}
