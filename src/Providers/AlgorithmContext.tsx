@@ -9,8 +9,13 @@ interface AlgorithmContextType {
   algorithm: Algorithm;
   setAlgorithm: (algo: Algorithm) => void;
   isSolving: boolean;
+  isPaused: boolean;
+  isReset: boolean;
   startSolving: () => void;
+  pauseSolving: () => void;
+  resumeSolving: () => void;
   stopSolving: () => void;
+  setIsReset: (value: boolean) => void;
 }
 
 const AlgorithmContext = createContext<AlgorithmContextType | undefined>(
@@ -20,9 +25,27 @@ const AlgorithmContext = createContext<AlgorithmContextType | undefined>(
 export function AlgorithmProvider({ children }: { children: ReactNode }) {
   const [algorithm, setAlgorithm] = useState<Algorithm>("");
   const [isSolving, setIsSolving] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isReset, setIsReset] = useState(false);
 
-  const startSolving = () => setIsSolving(true);
-  const stopSolving = () => setIsSolving(false);
+  const startSolving = () => {
+    setIsSolving(true);
+    setIsPaused(false);
+    setIsReset(false);
+  };
+
+  const pauseSolving = () => {
+    setIsPaused(true);
+  };
+
+  const resumeSolving = () => {
+    setIsPaused(false);
+  };
+
+  const stopSolving = () => {
+    setIsSolving(false);
+    setIsPaused(false);
+  };
 
   return (
     <AlgorithmContext.Provider
@@ -30,8 +53,13 @@ export function AlgorithmProvider({ children }: { children: ReactNode }) {
         algorithm,
         setAlgorithm,
         isSolving,
+        isPaused,
+        isReset,
         startSolving,
+        pauseSolving,
+        resumeSolving,
         stopSolving,
+        setIsReset,
       }}
     >
       {children}

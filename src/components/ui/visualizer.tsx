@@ -1,31 +1,67 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { initializeGrid } from "../../utils/grid";
 import Node from "../../lib/node";
 import { toast } from "react-toastify";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
 import { bfs } from "../../../backend/algorithms/bfs";
 import { GRAPH_ALGORITHMS } from "../../utils/consts";
-
-type NodeSelection = "START" | "END" | "WALL" | null;
+import { useGridReducer } from "../../hooks/useGridReducer";
 
 const Visualizer: React.FC = () => {
-  const [grid, setGrid] = useState<Node[][]>([]);
-  const [isMousePressed, setIsMousePressed] = useState(false);
-  const [selectionMode, setSelectionMode] = useState<NodeSelection>(null);
-  const [startNode, setStartNode] = useState<{
-    row: number;
-    col: number;
-  } | null>(null);
-  const [endNode, setEndNode] = useState<{ row: number; col: number } | null>(
-    null
-  );
-  const { algorithm, isSolving, stopSolving } = useAlgorithm();
+  const {
+    state,
+    setGrid,
+    setMousePressed,
+    setSelectionMode,
+    setStartNode,
+    setEndNode,
+    updateNode,
+  } = useGridReducer();
+
+  const { algorithm, isSolving, isPaused, stopSolving, isReset, setIsReset } =
+    useAlgorithm();
+  const isRunning = useRef(false);
+  const pauseRef = useRef(false);
+  const animationState = useRef<{
+    visitedIndex: number;
+    pathIndex: number;
+    visitedNodes: Node[];
+    pathNodes: Node[];
+  }>({
+    visitedIndex: 0,
+    pathIndex: 0,
+    visitedNodes: [],
+    pathNodes: [],
+  });
+
+  useEffect(() => {
+    console.log("isReset", isReset);
+    if (isReset) {
+      const newGrid = initializeGrid();
+      setGrid(newGrid);
+      setSelectionMode("START");
+      setIsReset(false);
+    }
+  }, [isReset]);
+
+  useEffect(() => {
+    pauseRef.current = isPaused;
+  }, [isPaused]);
+
+  useEffect(() => {
+    if (!isSolving) {
+      isRunning.current = false;
+    }
+    console.log("isSolving");
+  }, [isSolving]);
 
   useEffect(() => {
     const newGrid = initializeGrid();
     setGrid(newGrid);
+    setSelectionMode("START");
 
-    // Show toast after 1 second
+    console.log("newGrid");
+
     const timer = setTimeout(() => {
       toast.info("Please select a start node by clicking on the grid", {
         position: "top-center",
@@ -33,7 +69,6 @@ const Visualizer: React.FC = () => {
         closeOnClick: false,
         draggable: false,
       });
-      setSelectionMode("START");
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -41,74 +76,105 @@ const Visualizer: React.FC = () => {
 
   useEffect(() => {
     if (isSolving && algorithm === GRAPH_ALGORITHMS.BFS) {
+      isRunning.current = true;
+      pauseRef.current = false;
       handleVisualize();
     }
+    console.log("isSolving, algorithm");
   }, [isSolving, algorithm]);
 
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const waitForResume = async () => {
+    while (pauseRef.current) {
+      await sleep(100);
+    }
+  };
+
   const handleVisualize = async () => {
-    if (!startNode || !endNode) {
+    if (!state.startNode || !state.endNode) {
       toast.error("Please select both start and end nodes first!");
       stopSolving();
       return;
     }
 
-    // Note: grid[row][col] gives us the node at (col, row) in our coordinate system
-    const start = grid[startNode.row][startNode.col];
-    const end = grid[endNode.row][endNode.col];
+    const start = state.grid[state.startNode.row][state.startNode.col];
+    const end = state.grid[state.endNode.row][state.endNode.col];
 
-    // Run BFS algorithm
     const result = bfs(start, end);
 
-    // Animate the visited nodes
-    for (let i = 0; i < result.visitedNodesInOrder.length; i++) {
-      if (!isSolving) break;
+    animationState.current = {
+      visitedIndex: 0,
+      pathIndex: 0,
+      visitedNodes: result.visitedNodesInOrder,
+      pathNodes: result.shortestPath,
+    };
 
-      const node = result.visitedNodesInOrder[i];
+    await animateAlgorithm();
+  };
+
+  const animateAlgorithm = async () => {
+    const { visitedNodes, pathNodes } = animationState.current;
+
+    while (
+      animationState.current.visitedIndex < visitedNodes.length &&
+      isRunning.current
+    ) {
+      if (pauseRef.current) {
+        await waitForResume();
+        if (!isRunning.current) break;
+      }
+
+      const node = visitedNodes[animationState.current.visitedIndex];
       if (!node.isStart && !node.isEnd) {
-        await new Promise((resolve) => setTimeout(resolve, 20));
-        const newGrid = grid.slice();
-        // Node's x is column, y is row in our coordinate system
-        const visualNode = newGrid[node.getY()][node.getX()];
-        visualNode.setIsVisited(true);
-        setGrid(newGrid);
+        await sleep(20);
+        updateNode(node.getY(), node.getX(), { isVisited: true });
+      }
+      animationState.current.visitedIndex++;
+    }
+
+    if (
+      isRunning.current &&
+      animationState.current.visitedIndex === visitedNodes.length
+    ) {
+      while (
+        animationState.current.pathIndex < pathNodes.length &&
+        isRunning.current
+      ) {
+        if (pauseRef.current) {
+          await waitForResume();
+          if (!isRunning.current) break;
+        }
+
+        const node = pathNodes[animationState.current.pathIndex];
+        if (!node.isStart && !node.isEnd) {
+          await sleep(50);
+          updateNode(node.getY(), node.getX(), { distance: 1 });
+        }
+        animationState.current.pathIndex++;
       }
     }
 
-    // Animate the shortest path
-    for (let i = 0; i < result.shortestPath.length; i++) {
-      if (!isSolving) break;
-
-      const node = result.shortestPath[i];
-      if (!node.isStart && !node.isEnd) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        const newGrid = grid.slice();
-        // Node's x is column, y is row in our coordinate system
-        const visualNode = newGrid[node.getY()][node.getX()];
-        visualNode.setDistance(1);
-        setGrid(newGrid);
-      }
+    if (
+      !isRunning.current ||
+      (animationState.current.pathIndex === pathNodes.length &&
+        animationState.current.visitedIndex === visitedNodes.length)
+    ) {
+      stopSolving();
     }
-
-    stopSolving();
   };
 
   const handleNodeSelection = (row: number, col: number) => {
-    const newGrid = grid.slice();
-
-    // Clear previous start/end node if exists
-    if (selectionMode === "START" && startNode) {
-      const prevNode = newGrid[startNode.row][startNode.col];
-      prevNode.setIsStart(false);
-    } else if (selectionMode === "END" && endNode) {
-      const prevNode = newGrid[endNode.row][endNode.col];
-      prevNode.setIsEnd(false);
+    if (state.selectionMode === "START" && state.startNode) {
+      updateNode(state.startNode.row, state.startNode.col, { isStart: false });
+    } else if (state.selectionMode === "END" && state.endNode) {
+      updateNode(state.endNode.row, state.endNode.col, { isEnd: false });
     }
 
-    const node = newGrid[row][col];
-
-    if (selectionMode === "START") {
-      node.setIsStart(true);
-      setStartNode({ row, col }); // Store as row, col for grid access
+    if (state.selectionMode === "START") {
+      updateNode(row, col, { isStart: true });
+      setStartNode({ row, col });
       setSelectionMode("END");
       toast.dismiss();
       toast.info("Now select an end node", {
@@ -117,9 +183,9 @@ const Visualizer: React.FC = () => {
         closeOnClick: false,
         draggable: false,
       });
-    } else if (selectionMode === "END") {
-      node.setIsEnd(true);
-      setEndNode({ row, col }); // Store as row, col for grid access
+    } else if (state.selectionMode === "END") {
+      updateNode(row, col, { isEnd: true });
+      setEndNode({ row, col });
       setSelectionMode("WALL");
       toast.dismiss();
       toast.success(
@@ -130,13 +196,11 @@ const Visualizer: React.FC = () => {
         }
       );
     }
-
-    setGrid(newGrid);
   };
 
   return (
     <div className="grid grid-cols-[repeat(50,1fr)] gap-0 p-4 bg-white rounded-lg shadow-lg">
-      {grid.map((row, rowIdx) =>
+      {state.grid.map((row, rowIdx) =>
         row.map((node, colIdx) => (
           <div
             key={`${rowIdx}-${colIdx}`}
@@ -160,21 +224,16 @@ const Visualizer: React.FC = () => {
               transition-colors duration-300
             `}
             onMouseDown={() => {
-              setIsMousePressed(true);
+              setMousePressed(true);
               handleNodeSelection(rowIdx, colIdx);
             }}
             onMouseEnter={() => {
-              if (isMousePressed && selectionMode === "WALL") {
-                const newGrid = grid.slice();
-                const node = newGrid[rowIdx][colIdx];
-                if (!node.getIsStart() && !node.getIsEnd()) {
-                  node.setIsWall(!node.getIsWall());
-                  setGrid(newGrid);
-                }
+              if (state.isMousePressed && state.selectionMode === "WALL") {
+                updateNode(rowIdx, colIdx, { isWall: !node.getIsWall() });
               }
             }}
-            onMouseUp={() => setIsMousePressed(false)}
-            onMouseLeave={() => setIsMousePressed(false)}
+            onMouseUp={() => setMousePressed(false)}
+            onMouseLeave={() => setMousePressed(false)}
           />
         ))
       )}

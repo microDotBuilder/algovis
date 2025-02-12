@@ -59,6 +59,12 @@
   --chart-5: hsl(340 75% 55%);
 }
 
+@font-face {
+  font-family: Geist;
+  font-display: swap;
+  src: url("./assets/Geist/static/Geist-Regular.ttf") format("ttf");
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
