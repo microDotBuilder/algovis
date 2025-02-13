@@ -9,6 +9,7 @@ import { GRAPH_ALGORITHMS } from "../../utils/consts";
 import { useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
 
+/** @deprecated Use NewAlgorithmSelector component instead */
 export function AlgorithmSelector({
   setAlgo,
 }: {
@@ -26,18 +27,11 @@ export function AlgorithmSelector({
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => setAlgo(GRAPH_ALGORITHMS.BFS)}>
-          BFS
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setAlgo(GRAPH_ALGORITHMS.DFS)}>
-          DFS
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setAlgo(GRAPH_ALGORITHMS.DIJKSTRA)}>
-          Dijkstra
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setAlgo(GRAPH_ALGORITHMS.PRIM)}>
-          Prim
-        </DropdownMenuItem>
+        {Object.values(GRAPH_ALGORITHMS).map((al) => (
+          <DropdownMenuItem key={al} onClick={() => setAlgo(al)}>
+            {al}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,5 +1,5 @@
 import "./App.css";
-import Header from "./components/header/header";
+import NewHeader from "./components/header/header2";
 import Footer from "./components/footer/footer";
 import Main from "./components/main/main";
 import { AlgorithmProvider } from "./Providers/AlgorithmContext";
@@ -10,7 +10,7 @@ function App() {
   return (
     <div className="flex flex-col h-screen">
       <AlgorithmProvider>
-        <Header />
+        <NewHeader />
         <Main />
         <ToastContainer
           position="top-center"

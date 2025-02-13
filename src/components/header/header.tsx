@@ -1,11 +1,15 @@
 import { Button } from "../../components/ui/button";
-import { AlgorithmSelector } from "../ui/AlgoSelector";
+import { NewAlgorithmSelector } from "../ui/select/AlgorithmSelector";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import WarnDialog from "../ui/dialog/warnDialog";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
+/**
+ * @deprecated This component is deprecated and will be removed in a future version.
+ * Please use the NewHeader component instead.
+ */
 export default function Header() {
   const {
     algorithm,
@@ -68,7 +72,7 @@ export default function Header() {
           <div className="flex gap-4 font-mono text-2xl">
             ALGORITHM VISUALIZER
           </div>
-          <AlgorithmSelector setAlgo={setAlgorithm} />
+          <NewAlgorithmSelector setAlgo={setAlgorithm} />
           <nav>
             <ul className="flex gap-4">
               <Button
