@@ -3,26 +3,36 @@ import NewHeader from "./components/header/header2";
 import Footer from "./components/footer/footer";
 import Main from "./components/main/main";
 import { AlgorithmProvider } from "./Providers/AlgorithmContext";
+import {
+  OnboardingProvider,
+  useOnboarding,
+} from "./Providers/OnboardingContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { WelcomeDialog } from "./lib/welcome-dialog";
-import { useState } from "react";
 
 function App() {
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [currentStep, setCurrentStep] = useState(0);
-
-  const completeOnboarding = () => {
-    setShowOnboarding(false);
-  };
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-zinc-50 to-white">
-      <WelcomeDialog
-        showOnboarding={showOnboarding}
-        currentStep={currentStep}
-        setCurrentStep={setCurrentStep}
-        completeOnboarding={completeOnboarding}
-      />
+    <OnboardingProvider>
+      <AppContent />
+    </OnboardingProvider>
+  );
+}
+
+function AppContent() {
+  const { showOnboarding, currentStep, setCurrentStep, completeOnboarding } =
+    useOnboarding();
+
+  return (
+    <div className="flex flex-col h-screen bg-gradient-to-b from-zinc-50 to-white">
+      {showOnboarding && currentStep === 0 && (
+        <WelcomeDialog
+          showOnboarding={showOnboarding}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
+          completeOnboarding={completeOnboarding}
+        />
+      )}
       <AlgorithmProvider>
         <NewHeader />
         <Main />

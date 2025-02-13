@@ -6,10 +6,15 @@ import WarnDialog from "../ui/dialog/warnDialog";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { ActionButton } from "../ui/button/ActionButton";
+import { useOnboarding } from "../../Providers/OnboardingContext";
+import { OnboardingTooltip } from "../onboarding/onboarding";
+import { onboardingSteps } from "../../lib/onboarding-steps";
 
 export default function NewHeader() {
   const { stopSolving, isSolving, pauseSolving, setIsReset, setAlgorithm } =
     useAlgorithm();
+  const { showOnboarding, currentStep, setCurrentStep, completeOnboarding } =
+    useOnboarding();
 
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
@@ -41,6 +46,14 @@ export default function NewHeader() {
           <div className="flex items-center gap-4">
             <div className="relative algorithm-select">
               <NewAlgorithmSelector setAlgo={setAlgorithm} />
+              {showOnboarding && currentStep === 1 && (
+                <OnboardingTooltip
+                  step={onboardingSteps[1]}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  completeOnboarding={completeOnboarding}
+                />
+              )}
             </div>
             <div className="relative action-buttons">
               <div className="flex items-center gap-2">
@@ -55,6 +68,14 @@ export default function NewHeader() {
                   Reset
                 </Button>
               </div>
+              {showOnboarding && currentStep === 3 && (
+                <OnboardingTooltip
+                  step={onboardingSteps[3]}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  completeOnboarding={completeOnboarding}
+                />
+              )}
             </div>
           </div>
         </div>

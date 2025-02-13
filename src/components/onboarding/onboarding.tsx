@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils";
-import { OnboardingStep } from "@/types/types";
+import { cn } from "../../lib/utils";
+import { OnboardingStep } from "../../types/types";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
-import { onboardingSteps } from "@/lib/onboarding-steps";
+import { onboardingSteps } from "../../lib/onboarding-steps";
 
 export const OnboardingTooltip = ({
   step,
@@ -24,6 +24,8 @@ export const OnboardingTooltip = ({
           "bottom-full mb-2": step.placement === "top",
           "left-full ml-2": step.placement === "right",
           "right-full mr-2": step.placement === "left",
+          "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2":
+            step.placement === "middle",
         }
       )}
     >

@@ -1,4 +1,4 @@
-import { OnboardingStep } from "@/types/types";
+import { OnboardingStep } from "../types/types";
 
 export const onboardingSteps: OnboardingStep[] = [
   {
@@ -16,16 +16,16 @@ export const onboardingSteps: OnboardingStep[] = [
     placement: "bottom",
   },
   {
-    title: "Draw Walls",
+    title: "Visualization Grid",
     description:
-      "Click and drag on the grid to draw walls. For pathfinding algorithms, these walls will be obstacles.",
+      "This is where the magic happens! You'll see the algorithm's execution visualized step by step. For pathfinding algorithms, you can draw walls by clicking and dragging on the grid.",
     target: ".visualization-grid",
-    placement: "top",
+    placement: "middle",
   },
   {
-    title: "Visualize",
+    title: "Control Panel",
     description:
-      "Click 'Solve' to watch the algorithm in action. You can reset the grid at any time.",
+      "Use these buttons to control the visualization. Click 'Solve' to start, and use 'Reset' to clear the grid.",
     target: ".action-buttons",
     placement: "bottom",
   },
