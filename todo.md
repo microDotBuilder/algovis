@@ -1,0 +1,4 @@
+- [ ] make the flow work
+- [ ] make the onboarding work
+- [ ] make the algorithm show when visualizer is working
+- [ ] make the solve button disabled when the visualizer is done - [ ] and ask user to click reset to do it again

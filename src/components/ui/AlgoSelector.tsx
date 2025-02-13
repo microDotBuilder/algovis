@@ -28,7 +28,11 @@ export function AlgorithmSelector({
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {Object.values(GRAPH_ALGORITHMS).map((al) => (
-          <DropdownMenuItem key={al} onClick={() => setAlgo(al)}>
+          <DropdownMenuItem
+            key={al}
+            onClick={() => setAlgo(al)}
+            className="cursor-pointer uppercase"
+          >
             {al}
           </DropdownMenuItem>
         ))}

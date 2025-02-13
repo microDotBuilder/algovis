@@ -63,16 +63,16 @@ const Visualizer: React.FC = () => {
 
     console.log("newGrid");
 
-    const timer = setTimeout(() => {
-      toast.info("Please select a start node by clicking on the grid", {
-        position: "top-center",
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-      });
-    }, 1000);
+    // const timer = setTimeout(() => {
+    //   // toast.info("Please select a start node by clicking on the grid", {
+    //     position: "top-center",
+    //     autoClose: false,
+    //     closeOnClick: false,
+    //     draggable: false,
+    //   });
+    // }, 1000);
 
-    return () => clearTimeout(timer);
+    // return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

@@ -5,10 +5,24 @@ import Main from "./components/main/main";
 import { AlgorithmProvider } from "./Providers/AlgorithmContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { WelcomeDialog } from "./lib/welcome-dialog";
+import { useState } from "react";
 
 function App() {
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const completeOnboarding = () => {
+    setShowOnboarding(false);
+  };
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-zinc-50 to-white">
+      <WelcomeDialog
+        showOnboarding={showOnboarding}
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+        completeOnboarding={completeOnboarding}
+      />
       <AlgorithmProvider>
         <NewHeader />
         <Main />
