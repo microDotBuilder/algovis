@@ -4,6 +4,10 @@ import Node from "../../lib/node";
 import { toast } from "react-toastify";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
 import { bfs } from "../../../backend/algorithms/bfs";
+import { dfs } from "../../../backend/algorithms/dfs";
+import { dijkstra } from "../../../backend/algorithms/dijkstra";
+import { astar } from "../../../backend/algorithms/astar";
+import { bellmanFord } from "../../../backend/algorithms/bellmanford";
 import { GRAPH_ALGORITHMS } from "../../utils/consts";
 import { useGrid } from "../../Providers/GridContext";
 
@@ -65,12 +69,12 @@ const Visualizer: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isSolving && algorithm === GRAPH_ALGORITHMS.BFS) {
+    if (isSolving && algorithm) {
       isRunning.current = true;
       pauseRef.current = false;
       handleVisualize();
     }
-    console.log("isSolving, algorithm");
+    console.log("isSolving, algorithm:", isSolving, algorithm);
   }, [isSolving, algorithm]);
 
   const sleep = (ms: number) =>
@@ -92,7 +96,28 @@ const Visualizer: React.FC = () => {
     const start = state.grid[state.startNode.row][state.startNode.col];
     const end = state.grid[state.endNode.row][state.endNode.col];
 
-    const result = bfs(start, end);
+    let result;
+    if (algorithm === GRAPH_ALGORITHMS.BFS) {
+      result = bfs(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.DFS) {
+      result = dfs(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.DIJKSTRA) {
+      result = dijkstra(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.ASTAR) {
+      result = astar(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.BELLMAN_FORD) {
+      result = bellmanFord(start, end, state.grid);
+    }
+
+    console.log("result got -> ", result);
+    if (!result) {
+      toast.error("No path found to the target node!", {
+        position: "top-center",
+        autoClose: 5000,
+      });
+      stopSolving();
+      return;
+    }
 
     animationState.current = {
       visitedIndex: 0,
@@ -107,6 +132,7 @@ const Visualizer: React.FC = () => {
   const animateAlgorithm = async () => {
     const { visitedNodes, pathNodes } = animationState.current;
 
+    // Animate visited nodes
     while (
       animationState.current.visitedIndex < visitedNodes.length &&
       isRunning.current
@@ -124,6 +150,29 @@ const Visualizer: React.FC = () => {
       animationState.current.visitedIndex++;
     }
 
+    // If path is empty but we've visited nodes, it means no path was found
+    if (
+      isRunning.current &&
+      pathNodes.length === 0 &&
+      visitedNodes.length > 0
+    ) {
+      toast.error("No path found to the target node!", {
+        position: "top-center",
+        autoClose: 5000,
+      });
+
+      // Optional: Animate visited nodes with a "failure" color
+      for (const node of visitedNodes) {
+        if (!node.isStart && !node.isEnd && !node.isWall) {
+          await sleep(10);
+          updateNode(node.getY(), node.getX(), { distance: 2 }); // Using distance 2 to show a different color
+        }
+      }
+      stopSolving();
+      return;
+    }
+
+    // If we have a path, animate it
     if (
       isRunning.current &&
       animationState.current.visitedIndex === visitedNodes.length
@@ -151,47 +200,107 @@ const Visualizer: React.FC = () => {
       (animationState.current.pathIndex === pathNodes.length &&
         animationState.current.visitedIndex === visitedNodes.length)
     ) {
+      if (pathNodes.length > 0) {
+        toast.success("Path found!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
       stopSolving();
     }
   };
 
   const handleNodeSelection = (row: number, col: number) => {
-    if (state.grid[row][col].getIsStart() || state.grid[row][col].getIsEnd()) {
-      return;
-    }
+    const clickedNode = state.grid[row][col];
 
-    if (state.selectionMode === "START" && state.startNode) {
-      updateNode(state.startNode.row, state.startNode.col, { isStart: false });
-    } else if (state.selectionMode === "END" && state.endNode) {
-      updateNode(state.endNode.row, state.endNode.col, { isEnd: false });
-    }
-
-    if (state.selectionMode === "START") {
-      updateNode(row, col, { isStart: true });
-      setStartNode({ row, col });
-      setSelectionMode("END");
+    // Handle clicking on existing start or end node
+    if (clickedNode.getIsStart()) {
+      updateNode(row, col, { isStart: false });
+      setStartNode(null);
+      setSelectionMode("START");
       toast.dismiss();
-      toast.info("Now select an end node", {
+      toast.info("Select a new start node", {
         position: "top-center",
         autoClose: false,
         closeOnClick: false,
         draggable: false,
       });
-    } else if (state.selectionMode === "END") {
-      updateNode(row, col, { isEnd: true });
-      setEndNode({ row, col });
-      setSelectionMode("WALL");
+      return;
+    }
+
+    if (clickedNode.getIsEnd()) {
+      updateNode(row, col, { isEnd: false });
+      setEndNode(null);
+      setSelectionMode("END");
       toast.dismiss();
-      toast.success(
-        "You can now draw walls by clicking or dragging on the grid!",
-        {
+      toast.info("Select a new end node", {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+      });
+      return;
+    }
+
+    // Handle setting new start/end nodes
+    if (state.selectionMode === "START") {
+      // Clear previous start node if it exists
+      if (state.startNode) {
+        updateNode(state.startNode.row, state.startNode.col, {
+          isStart: false,
+        });
+      }
+      updateNode(row, col, { isStart: true });
+      setStartNode({ row, col });
+      toast.dismiss();
+
+      // If end node exists, stay in WALL mode, otherwise switch to END mode
+      if (state.endNode) {
+        setSelectionMode("WALL");
+        toast.success("Start node moved successfully!", {
           position: "top-center",
           autoClose: 3000,
-        }
-      );
+        });
+      } else {
+        setSelectionMode("END");
+        toast.info("Now select an end node", {
+          position: "top-center",
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+        });
+      }
+    } else if (state.selectionMode === "END") {
+      // Clear previous end node if it exists
+      if (state.endNode) {
+        updateNode(state.endNode.row, state.endNode.col, { isEnd: false });
+      }
+      updateNode(row, col, { isEnd: true });
+      setEndNode({ row, col });
+      toast.dismiss();
+
+      // If start node exists, stay in WALL mode, otherwise switch to START mode
+      if (state.startNode) {
+        setSelectionMode("WALL");
+        toast.success("End node moved successfully!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } else {
+        setSelectionMode("START");
+        toast.info("Now select a start node", {
+          position: "top-center",
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+        });
+      }
     } else if (state.selectionMode === "WALL") {
-      drawMode.current = !state.grid[row][col].getIsWall();
-      updateNode(row, col, { isWall: drawMode.current });
+      // Don't allow placing walls on start or end nodes
+      if (!clickedNode.getIsStart() && !clickedNode.getIsEnd()) {
+        drawMode.current = !clickedNode.getIsWall();
+        updateNode(row, col, { isWall: drawMode.current });
+      }
     }
   };
 
@@ -206,10 +315,8 @@ const Visualizer: React.FC = () => {
       state.selectionMode === "WALL" &&
       drawMode.current !== null
     ) {
-      if (
-        !state.grid[row][col].getIsStart() &&
-        !state.grid[row][col].getIsEnd()
-      ) {
+      const node = state.grid[row][col];
+      if (!node.getIsStart() && !node.getIsEnd()) {
         updateNode(row, col, { isWall: drawMode.current });
       }
     }
@@ -247,6 +354,13 @@ const Visualizer: React.FC = () => {
                 !node.getIsStart() &&
                 !node.getIsEnd()
                   ? "bg-yellow-400"
+                  : ""
+              }
+              ${
+                node.getDistance() === 2 &&
+                !node.getIsStart() &&
+                !node.getIsEnd()
+                  ? "bg-red-200"
                   : ""
               }
               transition-colors duration-300
