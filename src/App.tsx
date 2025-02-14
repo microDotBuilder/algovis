@@ -10,6 +10,7 @@ import {
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { WelcomeDialog } from "./lib/welcome-dialog";
+import { GridProvider } from "./Providers/GridContext";
 
 function App() {
   return (
@@ -33,22 +34,24 @@ function AppContent() {
           completeOnboarding={completeOnboarding}
         />
       )}
-      <AlgorithmProvider>
-        <NewHeader />
-        <Main />
-        <ToastContainer
-          position="top-center"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </AlgorithmProvider>
+      <GridProvider>
+        <AlgorithmProvider>
+          <NewHeader />
+          <Main />
+          <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </AlgorithmProvider>
+      </GridProvider>
       <Footer />
     </div>
   );

@@ -5,7 +5,7 @@ import { PauseIcon, PlayIcon } from "lucide-react";
 import WarnDialog from "../ui/dialog/warnDialog";
 import { useState } from "react";
 import { toast } from "react-toastify";
-
+// import { saveGridState } from "../../utils/grid";
 /**
  * @deprecated This component is deprecated and will be removed in a future version.
  * Please use the NewHeader component instead.
@@ -27,6 +27,8 @@ export default function Header() {
 
   const handleSolveClick = () => {
     if (algorithm) {
+      // want to store the current state of the grid in the local db
+      // saveGridState(grid);
       startSolving();
     } else {
       toast.error("Please select an algorithm first");

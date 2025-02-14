@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
 import { bfs } from "../../../backend/algorithms/bfs";
 import { GRAPH_ALGORITHMS } from "../../utils/consts";
-import { useGridReducer } from "../../hooks/useGridReducer";
+import { useGrid } from "../../Providers/GridContext";
 
 const Visualizer: React.FC = () => {
   const {
@@ -16,7 +16,7 @@ const Visualizer: React.FC = () => {
     setStartNode,
     setEndNode,
     updateNode,
-  } = useGridReducer();
+  } = useGrid();
 
   const { algorithm, isSolving, isPaused, stopSolving, isReset, setIsReset } =
     useAlgorithm();
@@ -62,17 +62,6 @@ const Visualizer: React.FC = () => {
     setSelectionMode("START");
 
     console.log("newGrid");
-
-    // const timer = setTimeout(() => {
-    //   // toast.info("Please select a start node by clicking on the grid", {
-    //     position: "top-center",
-    //     autoClose: false,
-    //     closeOnClick: false,
-    //     draggable: false,
-    //   });
-    // }, 1000);
-
-    // return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
