@@ -4,6 +4,10 @@ import Node from "../../lib/node";
 import { toast } from "react-toastify";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
 import { bfs } from "../../../backend/algorithms/bfs";
+import { dfs } from "../../../backend/algorithms/dfs";
+import { dijkstra } from "../../../backend/algorithms/dijkstra";
+import { astar } from "../../../backend/algorithms/astar";
+import { bellmanFord } from "../../../backend/algorithms/bellmanford";
 import { GRAPH_ALGORITHMS } from "../../utils/consts";
 import { useGrid } from "../../Providers/GridContext";
 
@@ -65,12 +69,12 @@ const Visualizer: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isSolving && algorithm === GRAPH_ALGORITHMS.BFS) {
+    if (isSolving && algorithm) {
       isRunning.current = true;
       pauseRef.current = false;
       handleVisualize();
     }
-    console.log("isSolving, algorithm");
+    console.log("isSolving, algorithm:", isSolving, algorithm);
   }, [isSolving, algorithm]);
 
   const sleep = (ms: number) =>
@@ -92,7 +96,28 @@ const Visualizer: React.FC = () => {
     const start = state.grid[state.startNode.row][state.startNode.col];
     const end = state.grid[state.endNode.row][state.endNode.col];
 
-    const result = bfs(start, end);
+    let result;
+    if (algorithm === GRAPH_ALGORITHMS.BFS) {
+      result = bfs(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.DFS) {
+      result = dfs(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.DIJKSTRA) {
+      result = dijkstra(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.ASTAR) {
+      result = astar(start, end);
+    } else if (algorithm === GRAPH_ALGORITHMS.BELLMAN_FORD) {
+      result = bellmanFord(start, end, state.grid);
+    }
+
+    console.log("result got -> ", result);
+    if (!result) {
+      toast.error("No path found to the target node!", {
+        position: "top-center",
+        autoClose: 5000,
+      });
+      stopSolving();
+      return;
+    }
 
     animationState.current = {
       visitedIndex: 0,
