@@ -7,6 +7,8 @@
 
 step 3 :
 
-- [ ] implement if cannot reach the end node
+- [x] implement if cannot reach the end node
 
 step 4 :
+
+- [x] allow user to reselct the start and end nodes

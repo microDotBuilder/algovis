@@ -186,42 +186,96 @@ const Visualizer: React.FC = () => {
   };
 
   const handleNodeSelection = (row: number, col: number) => {
-    if (state.grid[row][col].getIsStart() || state.grid[row][col].getIsEnd()) {
-      return;
-    }
+    const clickedNode = state.grid[row][col];
 
-    if (state.selectionMode === "START" && state.startNode) {
-      updateNode(state.startNode.row, state.startNode.col, { isStart: false });
-    } else if (state.selectionMode === "END" && state.endNode) {
-      updateNode(state.endNode.row, state.endNode.col, { isEnd: false });
-    }
-
-    if (state.selectionMode === "START") {
-      updateNode(row, col, { isStart: true });
-      setStartNode({ row, col });
-      setSelectionMode("END");
+    // Handle clicking on existing start or end node
+    if (clickedNode.getIsStart()) {
+      updateNode(row, col, { isStart: false });
+      setStartNode(null);
+      setSelectionMode("START");
       toast.dismiss();
-      toast.info("Now select an end node", {
+      toast.info("Select a new start node", {
         position: "top-center",
         autoClose: false,
         closeOnClick: false,
         draggable: false,
       });
-    } else if (state.selectionMode === "END") {
-      updateNode(row, col, { isEnd: true });
-      setEndNode({ row, col });
-      setSelectionMode("WALL");
+      return;
+    }
+
+    if (clickedNode.getIsEnd()) {
+      updateNode(row, col, { isEnd: false });
+      setEndNode(null);
+      setSelectionMode("END");
       toast.dismiss();
-      toast.success(
-        "You can now draw walls by clicking or dragging on the grid!",
-        {
+      toast.info("Select a new end node", {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+      });
+      return;
+    }
+
+    // Handle setting new start/end nodes
+    if (state.selectionMode === "START") {
+      // Clear previous start node if it exists
+      if (state.startNode) {
+        updateNode(state.startNode.row, state.startNode.col, {
+          isStart: false,
+        });
+      }
+      updateNode(row, col, { isStart: true });
+      setStartNode({ row, col });
+      toast.dismiss();
+
+      // If end node exists, stay in WALL mode, otherwise switch to END mode
+      if (state.endNode) {
+        setSelectionMode("WALL");
+        toast.success("Start node moved successfully!", {
           position: "top-center",
           autoClose: 3000,
-        }
-      );
+        });
+      } else {
+        setSelectionMode("END");
+        toast.info("Now select an end node", {
+          position: "top-center",
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+        });
+      }
+    } else if (state.selectionMode === "END") {
+      // Clear previous end node if it exists
+      if (state.endNode) {
+        updateNode(state.endNode.row, state.endNode.col, { isEnd: false });
+      }
+      updateNode(row, col, { isEnd: true });
+      setEndNode({ row, col });
+      toast.dismiss();
+
+      // If start node exists, stay in WALL mode, otherwise switch to START mode
+      if (state.startNode) {
+        setSelectionMode("WALL");
+        toast.success("End node moved successfully!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } else {
+        setSelectionMode("START");
+        toast.info("Now select a start node", {
+          position: "top-center",
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+        });
+      }
     } else if (state.selectionMode === "WALL") {
-      drawMode.current = !state.grid[row][col].getIsWall();
-      updateNode(row, col, { isWall: drawMode.current });
+      // Don't allow placing walls on start or end nodes
+      if (!clickedNode.getIsStart() && !clickedNode.getIsEnd()) {
+        drawMode.current = !clickedNode.getIsWall();
+        updateNode(row, col, { isWall: drawMode.current });
+      }
     }
   };
 
@@ -236,10 +290,8 @@ const Visualizer: React.FC = () => {
       state.selectionMode === "WALL" &&
       drawMode.current !== null
     ) {
-      if (
-        !state.grid[row][col].getIsStart() &&
-        !state.grid[row][col].getIsEnd()
-      ) {
+      const node = state.grid[row][col];
+      if (!node.getIsStart() && !node.getIsEnd()) {
         updateNode(row, col, { isWall: drawMode.current });
       }
     }
