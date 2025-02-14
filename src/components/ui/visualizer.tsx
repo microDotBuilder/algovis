@@ -5,9 +5,9 @@ import { toast } from "react-toastify";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
 import { bfs } from "../../../backend/algorithms/bfs";
 import { dfs } from "../../../backend/algorithms/dfs";
-import { dijkstra } from "../../../backend/algorithms/dijkstra";
-import { astar } from "../../../backend/algorithms/astar";
-import { bellmanFord } from "../../../backend/algorithms/bellmanford";
+import { dijkstra } from "../../../backend/algorithms/Dijkstra";
+import { astar } from "../../../backend/algorithms/Astar";
+import { bellmanFord } from "../../../backend/algorithms/BellmanFord";
 import { GRAPH_ALGORITHMS } from "../../utils/consts";
 import { useGrid } from "../../Providers/GridContext";
 
