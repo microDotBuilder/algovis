@@ -1,6 +1,6 @@
+- [ ] create a local sync layer using indexedDB
+- [ ] make the sync layer work
 - [ ] make the flow work
-- [ ] make the onboarding work
-- [ ] make the algorithm show when visualizer is working
+- [x] make the onboarding work
+- [x] make the algorithm show when visualizer is working
 - [ ] make the solve button disabled when the visualizer is done - [ ] and ask user to click reset to do it again
-
--[ ] create a local sync layer using indexedDB

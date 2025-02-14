@@ -1,7 +1,7 @@
 import { Button } from "../../components/ui/button";
 import { NewAlgorithmSelector } from "../ui/select/AlgorithmSelector";
 import { useAlgorithm } from "../../Providers/AlgorithmContext";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, FolderOpen } from "lucide-react";
 import WarnDialog from "../ui/dialog/warnDialog";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -9,8 +9,13 @@ import { ActionButton } from "../ui/button/ActionButton";
 import { useOnboarding } from "../../Providers/OnboardingContext";
 import { OnboardingTooltip } from "../onboarding/onboarding";
 import { onboardingSteps } from "../../lib/onboarding-steps";
+import { useGrid } from "../../Providers/GridContext";
+import { getAllGridStates, applyGridState } from "../../utils/gridState";
 
 export default function NewHeader() {
+  const {
+    state: { grid },
+  } = useGrid();
   const { stopSolving, isSolving, pauseSolving, setIsReset, setAlgorithm } =
     useAlgorithm();
   const { showOnboarding, currentStep, setCurrentStep, completeOnboarding } =
@@ -36,6 +41,22 @@ export default function NewHeader() {
     setIsResetDialogOpen(false);
   };
 
+  const handleReloadState = async () => {
+    try {
+      const states = await getAllGridStates();
+      if (states.length > 0) {
+        const lastState = states[0]; // Get the most recent state
+        applyGridState(grid, lastState);
+        toast.success("Successfully loaded the last saved grid state!");
+      } else {
+        toast.info("No saved grid states found.");
+      }
+    } catch (error) {
+      console.error("Failed to load grid state:", error);
+      toast.error("Failed to load the grid state.");
+    }
+  };
+
   return (
     <>
       <header className="sticky top-0 z-40 px-4 border-b bg-white/80 backdrop-blur-sm">
@@ -58,6 +79,10 @@ export default function NewHeader() {
             <div className="relative action-buttons">
               <div className="flex items-center gap-2">
                 <ActionButton />
+                <Button variant="outline" size="sm" onClick={handleReloadState}>
+                  <FolderOpen className="mr-2 h-4 w-4" />
+                  Reload State
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"

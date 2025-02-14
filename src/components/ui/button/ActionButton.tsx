@@ -2,8 +2,13 @@ import { Button } from "../button";
 import { PauseIcon, Play, PlayIcon } from "lucide-react";
 import { useAlgorithm } from "../../../Providers/AlgorithmContext";
 import { toast } from "react-toastify";
+import { saveGridState } from "../../../utils/gridState";
+import { useGrid } from "../../../Providers/GridContext";
 
 export function ActionButton() {
+  const {
+    state: { grid },
+  } = useGrid();
   const {
     algorithm,
     startSolving,
@@ -13,10 +18,23 @@ export function ActionButton() {
     isSolving,
   } = useAlgorithm();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!isSolving) {
       if (algorithm) {
-        startSolving();
+        try {
+          console.log("Saving grid state");
+          // Save grid state before starting
+          await saveGridState(
+            grid,
+            `${algorithm} - ${new Date().toLocaleString()}`
+          );
+          console.log("Grid state saved");
+          startSolving();
+        } catch (error) {
+          console.error("Failed to save grid state:", error);
+          // Continue with solving even if saving fails
+          startSolving();
+        }
       } else {
         toast.error("Please select an algorithm first");
       }

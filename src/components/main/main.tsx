@@ -3,31 +3,53 @@ import Visualizer from "../ui/visualizer";
 import { useOnboarding } from "../../Providers/OnboardingContext";
 import { OnboardingTooltip } from "../onboarding/onboarding";
 import { onboardingSteps } from "../../lib/onboarding-steps";
-import { useEffect } from "react";
-import { useToast } from "../../hooks/useToast";
+import { useEffect, useRef } from "react";
+import { toast, Id } from "react-toastify";
 
 export default function Main() {
   const { algorithm, isSolving } = useAlgorithm();
   const { showOnboarding, currentStep, setCurrentStep, completeOnboarding } =
     useOnboarding();
-  const { showToast, resetToast } = useToast();
+  const toastId = useRef<Id | null>(null);
 
   useEffect(() => {
     if (algorithm && isSolving) {
-      showToast(`Running ${algorithm}`);
+      if (!toastId.current || !toast.isActive(toastId.current)) {
+        toastId.current = toast.info(`Running ${algorithm}`, {
+          autoClose: 5000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    } else {
+      if (toastId.current) {
+        toast.dismiss(toastId.current);
+        toastId.current = null;
+      }
     }
-    // Only reset the toast when algorithm changes or visualization stops completely
-    if (!isSolving) {
-      resetToast();
-    }
+
+    return () => {
+      if (toastId.current) {
+        toast.dismiss(toastId.current);
+        toastId.current = null;
+      }
+    };
   }, [algorithm, isSolving]);
 
   return (
     <main className="flex-1 bg-gray-300 p-4">
-      <div className="flex flex-col gap-4 items-center justify-center"></div>
+      <div className="flex flex-col gap-4 items-center justify-center">
+        <div className="flex">
+          {algorithm && isSolving && (
+            <p className="text-2xl font-mono"> Running {algorithm}</p>
+          )}
+        </div>
+      </div>
       <div className="relative">
         {showOnboarding && currentStep === 2 && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute  inset-0 flex items-center justify-center">
             <OnboardingTooltip
               step={onboardingSteps[2]}
               currentStep={currentStep}

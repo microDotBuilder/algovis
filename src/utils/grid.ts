@@ -3,8 +3,10 @@ import Node from "../lib/node";
 export const GRID_ROWS = 20; // Reasonable size for visualization
 export const GRID_COLS = 50; // Wider grid for better visualization
 
-export function initializeGrid(): Node[][] {
-  const grid: Node[][] = [];
+export type Grid = Node[][];
+
+export function initializeGrid(): Grid {
+  const grid: Grid = [];
 
   for (let row = 0; row < GRID_ROWS; row++) {
     const currentRow: Node[] = [];
@@ -50,7 +52,7 @@ export function initializeGrid(): Node[][] {
 }
 
 // Helper function to reset the grid to its initial state
-export function resetGrid(grid: Node[][]): void {
+export function resetGrid(grid: Grid): void {
   for (let row = 0; row < GRID_ROWS; row++) {
     for (let col = 0; col < GRID_COLS; col++) {
       const node = grid[row][col];
