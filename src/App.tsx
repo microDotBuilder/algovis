@@ -52,7 +52,9 @@ function AppContent() {
           />
         </AlgorithmProvider>
       </GridProvider>
-      <Footer />
+      <div className="mt-auto flex justify-center">
+        <Footer />
+      </div>
     </div>
   );
 }

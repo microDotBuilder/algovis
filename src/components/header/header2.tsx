@@ -93,12 +93,17 @@ export default function NewHeader() {
             <div className="relative action-buttons">
               <div className="flex items-center gap-2">
                 <ActionButton />
-                <Button variant="outline" size="sm" onClick={handleReloadState}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-[10px] h-10 font-mono"
+                  onClick={handleReloadState}
+                >
                   <FolderOpen className="mr-2 h-4 w-4" />
                   Reload State
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
                   className="text-[10px] h-10"
                   onClick={handleResetClick}
