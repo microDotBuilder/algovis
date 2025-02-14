@@ -15,6 +15,8 @@ import { getAllGridStates, applyGridState } from "../../utils/gridState";
 export default function NewHeader() {
   const {
     state: { grid },
+    setStartNode,
+    setEndNode,
   } = useGrid();
   const { stopSolving, isSolving, pauseSolving, setIsReset, setAlgorithm } =
     useAlgorithm();
@@ -46,7 +48,19 @@ export default function NewHeader() {
       const states = await getAllGridStates();
       if (states.length > 0) {
         const lastState = states[0]; // Get the most recent state
+        // Reset visualization state for all nodes
+        for (let row = 0; row < grid.length; row++) {
+          for (let col = 0; col < grid[0].length; col++) {
+            const node = grid[row][col];
+            node.setIsVisited(false);
+            node.setDistance(Infinity);
+            node.setPrevious(null);
+          }
+        }
         applyGridState(grid, lastState);
+        // Update internal state tracking
+        setStartNode(lastState.startNode);
+        setEndNode(lastState.endNode);
         toast.success("Successfully loaded the last saved grid state!");
       } else {
         toast.info("No saved grid states found.");
