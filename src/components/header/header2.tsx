@@ -48,6 +48,10 @@ export default function NewHeader() {
       const states = await getAllGridStates();
       if (states.length > 0) {
         const lastState = states[0]; // Get the most recent state
+        // case where user is solving and wants to reload the state
+        if (isSolving) {
+          stopSolving();
+        }
         // Reset visualization state for all nodes
         for (let row = 0; row < grid.length; row++) {
           for (let col = 0; col < grid[0].length; col++) {

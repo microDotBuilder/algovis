@@ -107,6 +107,7 @@ const Visualizer: React.FC = () => {
   const animateAlgorithm = async () => {
     const { visitedNodes, pathNodes } = animationState.current;
 
+    // Animate visited nodes
     while (
       animationState.current.visitedIndex < visitedNodes.length &&
       isRunning.current
@@ -124,6 +125,29 @@ const Visualizer: React.FC = () => {
       animationState.current.visitedIndex++;
     }
 
+    // If path is empty but we've visited nodes, it means no path was found
+    if (
+      isRunning.current &&
+      pathNodes.length === 0 &&
+      visitedNodes.length > 0
+    ) {
+      toast.error("No path found to the target node!", {
+        position: "top-center",
+        autoClose: 5000,
+      });
+
+      // Optional: Animate visited nodes with a "failure" color
+      for (const node of visitedNodes) {
+        if (!node.isStart && !node.isEnd && !node.isWall) {
+          await sleep(10);
+          updateNode(node.getY(), node.getX(), { distance: 2 }); // Using distance 2 to show a different color
+        }
+      }
+      stopSolving();
+      return;
+    }
+
+    // If we have a path, animate it
     if (
       isRunning.current &&
       animationState.current.visitedIndex === visitedNodes.length
@@ -151,6 +175,12 @@ const Visualizer: React.FC = () => {
       (animationState.current.pathIndex === pathNodes.length &&
         animationState.current.visitedIndex === visitedNodes.length)
     ) {
+      if (pathNodes.length > 0) {
+        toast.success("Path found!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
       stopSolving();
     }
   };
@@ -247,6 +277,13 @@ const Visualizer: React.FC = () => {
                 !node.getIsStart() &&
                 !node.getIsEnd()
                   ? "bg-yellow-400"
+                  : ""
+              }
+              ${
+                node.getDistance() === 2 &&
+                !node.getIsStart() &&
+                !node.getIsEnd()
+                  ? "bg-red-200"
                   : ""
               }
               transition-colors duration-300
