@@ -98,6 +98,7 @@ export default function NewHeader() {
                   size="sm"
                   className="text-[10px] h-10 font-mono"
                   onClick={handleReloadState}
+                  disabled={isSolving}
                 >
                   <FolderOpen className="mr-2 h-4 w-4" />
                   Reload State
@@ -107,6 +108,7 @@ export default function NewHeader() {
                   size="sm"
                   className="text-[10px] h-10"
                   onClick={handleResetClick}
+                  disabled={isSolving}
                 >
                   <RefreshCcw className="mr-2 h-4 w-4" />
                   Reset
