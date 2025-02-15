@@ -27,5 +27,28 @@ jobs:
       - name: Run lint
         run: pnpm run lint
 
-    #   - name: Run tests
-    #     run: pnpm run test
+      #   - name: Run tests
+      #     run: pnpm run test
+
+      - name: Create Deployment Status
+        if: success()
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/deployments/protection_rules \
+            -f environments='["production"]' \
+            -f required_contexts='["build-and-test"]'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: test # This ensures deploy only runs after tests pass
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' # Only deploy on main branch pushes
+
+    steps:
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
