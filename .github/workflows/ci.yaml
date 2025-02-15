@@ -36,9 +36,8 @@ jobs:
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository }}/deployments/protection_rules \
-            -f environments='["production"]' \
-            -f required_contexts='["build-and-test"]'
+            /repos/${{ github.repository }}/environments/production/protection_rules \
+            -f required_contexts='["test"]' # Corrected context name to match job name
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
