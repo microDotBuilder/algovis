@@ -108,7 +108,7 @@ export default function NewHeader() {
                   Reload State
                 </Button>
                 <Button
-                  variant="secondary"
+                  variant="destructive"
                   size="sm"
                   className="text-[10px] h-10"
                   onClick={handleResetClick}
