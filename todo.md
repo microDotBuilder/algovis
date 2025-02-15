@@ -17,7 +17,7 @@ step 5 :
 
 - [x] vercel only run on main branch for now and we will switch to production branch later
 - [x] create build system
-- [ ] fix the deployment on feature branches
+- [x] fix the deployment on feature branches - (fix the preview deployment issue)
 - [ ] create ci/cd pipeline
   - [ ] ci/cd pipeline should be like
   - [ ] listen to push to production branch
