@@ -17,7 +17,13 @@ step 5 :
 
 - [x] vercel only run on main branch for now and we will switch to production branch later
 - [x] create build system
+- [ ] fix the deployment on feature branches
 - [ ] create ci/cd pipeline
+  - [ ] ci/cd pipeline should be like
+  - [ ] listen to push to production branch
+  - [ ] run my ci/cd pipeline
+  - [ ] if it passes only then deploy to vercel
+  - [ ] i want to control the vercel deployment from github actions
 
 step 6:
 
