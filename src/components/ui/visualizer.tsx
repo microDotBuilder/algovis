@@ -44,6 +44,8 @@ const Visualizer: React.FC = () => {
     if (isReset) {
       const newGrid = initializeGrid();
       setGrid(newGrid);
+      setStartNode(null);
+      setEndNode(null);
       setSelectionMode("START");
       setIsReset(false);
     }

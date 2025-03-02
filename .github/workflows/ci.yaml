@@ -27,20 +27,6 @@ jobs:
       - name: Run lint
         run: pnpm run lint
 
-      #   - name: Run tests
-      #     run: pnpm run test
-
-      # - name: Create Deployment Status
-      #   if: success()
-      #   run: |
-      #     gh api \
-      #       --method POST \
-      #       -H "Accept: application/vnd.github+json" \
-      #       /repos/${{ github.repository }}/environments/production/protection_rules \
-      #       -f required_contexts='["test"]' # Corrected context name to match job name
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   deploy:
     needs: test # This ensures deploy only runs after tests pass
     runs-on: ubuntu-latest
